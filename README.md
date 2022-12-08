@@ -14,7 +14,7 @@ Special for MPE NetWorks by XackiGiFF
 - Multi servers \ Multiversion
 - Watch protocols from clients and send needs server with this protocol
 - Monitoring clients login\logout
-- Show active clients
+- Show active clients command
 - Manage clients and ban by ip
 - Close old sockets and sessions if client was disconnected
 - Create Phar core with composer
