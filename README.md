@@ -1,4 +1,6 @@
 # MPE-Proxy
+Simple proxy for mcpe. Can setup on hostings (If that agree from owner). May protect from ddos guard, if bind on guarded host.
+All users will realy playing from proxy IP. It`s hide ip of your clients, and you can`t use ban-ip...
 
 Tested on Minecraft Bedrock Edition (1.18.0, 1.18.30).
 
