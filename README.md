@@ -21,5 +21,5 @@ Special for MPE NetWorks by XackiGiFF
 
 ## Please help me, if you can and wish. Send me PR! Let`s do the best code for multiverse minecraft. (May be add Minecraft PC \ PE \ BE all version in proxy)
 ```
-Forked form https://github.com/hmy2001/MCBEProxy
+Forked form https://github.com/hmy2001/MCBEProxy and https://github.com/Frago9876543210/MCBE-Proxy
 ```
