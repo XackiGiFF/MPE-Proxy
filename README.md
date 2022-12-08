@@ -4,7 +4,7 @@ All users will realy playing from proxy IP. It\`s hide ip of your clients, and y
 
 Tested on Minecraft Bedrock Edition (1.18.0, 1.18.30).
 
-## PHP: 7.3+
+## PHP: 7.3+ (Need install 7.3 or any from new)
 
 Special for MPE NetWorks by XackiGiFF
 
