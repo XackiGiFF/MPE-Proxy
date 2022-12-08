@@ -7,5 +7,5 @@ Tested on Minecraft Bedrock Edition (1.18.0, 1.18.30).
 Special for MPE NetWorks by XackiGiFF
 
 ```
-Gets form https://github.com/hmy2001/MCBEProxy
+Forked form https://github.com/hmy2001/MCBEProxy
 ```
