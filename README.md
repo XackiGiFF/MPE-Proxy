@@ -2,7 +2,7 @@
 Simple proxy for mcpe. Can setup on hostings (If that agree from owner). May protect from ddos guard, if bind on guarded host.
 All users will realy playing from proxy IP. It\`s hide ip of your clients, and you can\`t use ban-ip...
 
-# What`s new?
+# What`s new? (Not stable)
 - Add RakLib protocol for read packets from server
 - Add Bedrock-Protocol for read packets in RackLib data
 - Add catch packets and try to initialize packet type, data in packets. (Maybe good for scientific read of packages )
