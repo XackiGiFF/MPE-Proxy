@@ -1,0 +1,27 @@
+{
+    "name": "xackigiff/mpe-proxy",
+    "description": "This is NOT pmmp core! This is re-translator proxy server for connect client via your own proxy server and for analysis packages",
+    "type": "project",
+    "require": {
+        "pocketmine/raklib": "^1.1",
+        "pocketmine/bedrock-protocol": "^33.0"
+    },
+    "license": "GNU Lesser General Public License v3.0",
+    "autoload": {
+        "psr-4": {
+            "Xackigiff\\MpeProxy\\": "src/"
+        }
+    },
+    "scripts": {
+        "make-server": [
+            "@composer install --no-dev --classmap-authoritative --ignore-platform-reqs",
+            "@php -dphar.readonly=0 build/server-phar.php"
+        ]
+    },
+    "authors": [
+        {
+            "name": "XackiGiFF",
+            "email": "m.girsanoff@mc-mpe.ru"
+        }
+    ]
+}
