@@ -6,7 +6,7 @@
         "pocketmine/raklib": "^1.1",
         "pocketmine/bedrock-protocol": "^33.0"
     },
-    "license": "GNU Lesser General Public License v3.0",
+    "license": "LGPL-3.0",
     "autoload": {
         "psr-4": {
             "Xackigiff\\MpeProxy\\": "src/"
