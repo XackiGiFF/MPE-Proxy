@@ -42,9 +42,9 @@ class Config{
 		return $this->content[$name] = $content;
 	}
 
-	public function save(){
+	public function save(): void
+    {
 		file_put_contents($this->path, json_encode($this->content, JSON_PRETTY_PRINT));
 	}
 
 }
-?>

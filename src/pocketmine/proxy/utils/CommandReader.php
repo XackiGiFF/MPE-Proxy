@@ -18,6 +18,7 @@
 namespace pocketmine\proxy\utils;
 
 class CommandReader{
+    protected $read, $write, $except;
 
 	public function __construct(){
 		$this->read = [];
@@ -25,11 +26,11 @@ class CommandReader{
 		$this->except = null;
 	}
 
-	public function getCommandLine(){
+	public function getCommandLine(): ?string
+    {
 		$this->read[] = STDIN;
 		if(stream_select($this->read, $this->write, $this->except, 0, 200000) > 0){
-			$line = trim(fgets(STDIN));
-			return $line;
+            return trim(fgets(STDIN));
 		}
 		return null;
 	}

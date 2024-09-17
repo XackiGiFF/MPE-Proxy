@@ -2,9 +2,14 @@
 Simple proxy for mcpe. Can setup on hostings (If that agree from owner). May protect from ddos guard, if bind on guarded host.
 All users will realy playing from proxy IP. It\`s hide ip of your clients, and you can\`t use ban-ip...
 
-Tested on Minecraft Bedrock Edition (1.18.0, 1.18.30).
+# What`s new?
+- Add RakLib protocol for read packets from server
+- Add Bedrock-Protocol for read packets in RackLib data
+- Add catch packets and try to initialize packet type, data in packets. (Maybe good for scientific read of packages )
 
-## PHP: 7.3+ (Need install 7.3 or any from new)
+Tested on Minecraft Bedrock Edition (1.18.0-1.21.30).
+
+## PHP: 8.0+ (Need install 8.0 or any from new)
 
 Special for MPE NetWorks by XackiGiFF
 

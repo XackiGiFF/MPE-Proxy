@@ -17,77 +17,166 @@
 
 namespace pocketmine\proxy\utils;
 
+use pocketmine\utils\BinaryStream;
+
+use raklib\protocol\MessageIdentifiers;
+use raklib\protocol\PacketSerializer;
+
+use pocketmine\proxy\utils\raklib\protocol\PublicOpenConnectionRequest1;
+use pocketmine\proxy\utils\raklib\protocol\PublicOpenConnectionRequest2;
+
+
 class SocketReader{
-	private $working = true, $sessions = [];
+    private $working = true, $sessions = [];
+    protected $logger, $host, $port, $serverip, $serverport, $clientSocket;
 
-	public function __construct($logger, $host, $port, $serverip, $serverport){
-		$this->logger = $logger;
-		$this->host = $host;
-		$this->port = $port;
-		$this->serverip = gethostbyname($serverip);
-		$this->serverport = $serverport;
+    public function __construct($logger, $host, $port, $serverip, $serverport){
+        $this->logger = $logger;
+        $this->host = $host;
+        $this->port = $port;
+        $this->serverip = gethostbyname($serverip);
+        $this->serverport = $serverport;
 
-		$this->clientSocket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
-		if(@socket_bind($this->clientSocket, $host, $port) === true){
-			$this->logger->debug("socket open (".$host.":".$port.")");
-		}else{
-			$this->working = false;
-			echo "Error\n";
-		}
-		socket_set_nonblock($this->clientSocket);
+        $this->clientSocket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
+        if(@socket_bind($this->clientSocket, $host, $port) === true){
+            $this->logger->debug("socket open (".$host.":".$port.")");
+        }else{
+            $this->working = false;
+            echo "Error\n";
+        }
+        socket_set_nonblock($this->clientSocket);
 
-		$this->logger->info("The proxy configure to ".$serverip." : ".$serverport);
-	}
+        $this->logger->info("The proxy configure to ".$serverip." : ".$serverport);
+    }
 
-	public function tick(){
-		if(!$this->working){
-			return;
-		}
-		$this->clientSocket();
-		$this->serverSocket();
-	}
+    public function setIP($ip) {
+        $this->serverip = $ip;
+    }
 
-	public function clientSocket(){
-		$bytes = $this->receiveClientSocket($buffer, $address, $port);
-		if($bytes !== false){
-			if(!isset($this->sessions[$address.":".$port])){
-				$this->logger->info("Client - {$address}:{$port}");
+    public function setPort($port) {
+        $this->serverport = $port;
+    }
 
-				$this->sessions[$address.":".$port] = new Session($this->logger, $this->host, $this->serverip, $this->serverport);
-			}
+    public function tick(): void
+    {
+        if(!$this->working){
+            return;
+        }
+        $this->clientSocket();
+        $this->serverSocket();
+    }
 
-			$this->sessions[$address.":".$port]->sendServerSocket($buffer);
-		}
-	}
+    // Это отправляет сервер
+    public function clientSocket(): void
+    {
+        $bytes = $this->receiveClientSocket($buffer, $address, $port);
+        if($bytes !== false){
+            if(!isset($this->sessions[$address.":".$port])){
+                $this->logger->info("Client - {$address}:{$port}");
 
-	public function serverSocket(){
-		foreach($this->sessions as $value => $session){
-			$bytes = $session->receiveServerSocket($buffer);
+                $this->sessions[$address.":".$port] = new Session($this->logger, $this->host, $this->serverip, $this->serverport);
+                $this->handleClientPacket($buffer, $address, $port);
+            }
+            $this->sessions[$address.":".$port]->sendServerSocket($buffer);
+        }
+    }
 
-			if($bytes !== false){
-				$value = explode(":", $value);
-				$this->sendClientSocket($buffer, $value[0], $value[1]);
-			}
-		}
-	}
+    // Это отправляет сервер
+    public function serverSocket(): void
+    {
+        foreach($this->sessions as $value => $session){
+            if($session instanceof Session){
+                $bytes = $session->receiveServerSocket($buffer);
 
-	public function sendClientSocket($buffer, $address, $port){
-		return socket_sendto($this->clientSocket, $buffer, strlen($buffer), 0, $address, $port);
-	}
+                if($bytes !== false){
+                    $value = explode(":", $value);
+                    $this->sendClientSocket($buffer, $value[0], $value[1]);
+                    $this->handleClientPacket($buffer, "0.0.0.0", 19132);
+                }
+            }
+        }
+    }
 
-	public function receiveClientSocket(&$buffer, &$address, &$port){
-		return socket_recvfrom($this->clientSocket, $buffer, 65535, 0, $address, $port);
-	}
+    public function sendClientSocket($buffer, $address, $port): bool|int
+    {
+        return socket_sendto($this->clientSocket, $buffer, strlen($buffer), 0, $address, $port);
+    }
 
-	public function shutdown(){
-		$this->working = false;
-		socket_close($this->clientSocket);
+    public function receiveClientSocket(&$buffer, &$address, &$port): bool|int
+    {
+        return socket_recvfrom($this->clientSocket, $buffer, 65535, 0, $address, $port);
+    }
 
-		$this->logger->debug("Closed Socket.");
-		
-		foreach($this->sessions as $value => $session){
-			$session->close($value);
-		}
-	}
+    public function shutdown(): void
+    {
+        $this->working = false;
+        socket_close($this->clientSocket);
 
+        $this->logger->debug("Closed Socket.");
+
+        foreach($this->sessions as $value => $session){
+            $session->close($value);
+        }
+    }
+
+    private function handleClientPacket($buffer, $address, $port): void
+    {
+        $this->logger->debug("Received buffer from {$address}:{$port}: " . bin2hex($buffer));
+
+        // Try read the type of packet
+        $stream = new BinaryStream($buffer);
+        $packetType = $stream->getByte();
+        $this->logger->debug($packetType);
+
+        switch ($packetType) {
+            case 0x80:
+                $this->logger->info("Client {$address}:{$port} get I DONT KNOW!");
+                break;
+            case MessageIdentifiers::ID_OPEN_CONNECTION_REQUEST_1:
+                $this->logger->debug("Processing connect request 1 from {$address}:{$port}");
+                $packet = new PublicOpenConnectionRequest1();
+                // Now we have access to the packet data.
+                break;
+            case MessageIdentifiers::ID_OPEN_CONNECTION_REQUEST_2:
+                $this->logger->debug("Processing connect request 2 from {$address}:{$port}");
+                $packet = new PublicOpenConnectionRequest2();
+                break;
+            case 0xfe:
+                $this->logger->info("Client {$address}:{$port} get QUERY INFO!");
+                break;
+            default:
+                $this->logger->warn("Received unknown packet type {$packetType} from {$address}:{$port}");
+                return;
+                break;
+        }
+        // Add debug message for checking the contents of the buffer
+        // Decode the packet
+        if(isset($packet)){
+            $raklib_packet_serializer = new PacketSerializer($buffer);
+            $packet->publicDecodePayload($raklib_packet_serializer);
+            //var_dump($packet);
+            // Do something with the packet
+            $this->processBedrockPacket($packet, $address, $port);
+        }
+    }
+
+    private function processBedrockPacket($packet, $address, $port): void
+    {
+        // Here you can process the packet using BedrockProtocol
+        // For example you can check the protocol and MTU size
+        if ($packet instanceof PublicOpenConnectionRequest1) {
+            $protocolVersion = $packet->protocol;
+            $this->logger->info(
+                "Protocol: " . $protocolVersion . "\n" .
+                "MTU Size: " . $packet->mtuSize . "\n");
+            //$this->logger->info("Client {$address}:{$port} is using RakNet protocol version {$protocolVersion}");
+        }
+        if ($packet instanceof PublicOpenConnectionRequest2) {
+            $clientID = $packet->clientID;
+            $this->logger->info("ClientID: " . $clientID . "\n" .
+            "Server Address: " . var_dump($packet->serverAddress) . "\n" .
+            "MTU Size: " . $packet->mtuSize . "\n");
+            //$this->logger->info("Client {$address}:{$port} is using RakNet protocol version {$protocolVersion}");
+        }
+    }
 }

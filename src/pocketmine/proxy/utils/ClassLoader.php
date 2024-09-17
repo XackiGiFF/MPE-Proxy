@@ -18,17 +18,20 @@
 namespace pocketmine\proxy\utils;
 
 class ClassLoader{
-	private $path = [];
+	private array $path = [];
 
-	public function addPath($path){
+	public function addPath($path): void
+    {
 		$this->path[] = $path;
 	}
 
-	public function register(){
+	public function register(): bool
+    {
 		return spl_autoload_register([$this, "loadClass"]);
 	}
 
-	public function findClass($name){
+	public function findClass($name): ?string
+    {
 		$components = explode("\\", $name);
 
 		$baseName = implode(DIRECTORY_SEPARATOR, $components);
@@ -43,7 +46,8 @@ class ClassLoader{
 		return null;
 	}
 
-	public function loadClass($name){
+	public function loadClass($name): bool
+    {
 		$path = $this->findClass($name);
 		if($path !== null){
 			include($path);

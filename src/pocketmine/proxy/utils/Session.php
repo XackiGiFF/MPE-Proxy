@@ -19,6 +19,7 @@ namespace pocketmine\proxy\utils;
 
 class Session{
 	public $working = true;
+    protected $serverip, $serverport, $logger, $serverSocket;
 
 	public function __construct($logger, $host, $serverip, $serverport){
 		$this->serverip = $serverip;
