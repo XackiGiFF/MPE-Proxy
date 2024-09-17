@@ -20,6 +20,13 @@ namespace pocketmine{
     use pocketmine\proxy\utils\ClassLoader;
 
     date_default_timezone_set('Europe/Moscow');
+
+    $vendorDir = __DIR__ . '/../../vendor';
+    if (PHP_SAPI === 'cli' && str_starts_with(__FILE__, 'phar://')) {
+        $vendorDir = 'phar://' . substr(__FILE__, 0, strpos(__FILE__, '://')) . '/vendor';
+    }
+    require_once $vendorDir . '/autoload.php';
+
     require_once(__DIR__ . "/proxy/utils/ClassLoader.php");
 
     $loader = new ClassLoader();
