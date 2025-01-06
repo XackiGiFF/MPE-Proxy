@@ -18,23 +18,35 @@
 namespace pocketmine{
     use pocketmine\proxy\MPEProxy;
     use pocketmine\proxy\utils\ClassLoader;
+    use pocketmine\proxy\utils\Logger;
 
     date_default_timezone_set('Europe/Moscow');
 
-    $vendorDir = __DIR__ . '/../../vendor';
-    if (PHP_SAPI === 'cli' && str_starts_with(__FILE__, 'phar://')) {
-        $vendorDir = 'phar://' . substr(__FILE__, 0, strpos(__FILE__, '://')) . '/vendor';
-    }
-    require_once $vendorDir . '/autoload.php';
-
     require_once(__DIR__ . "/proxy/utils/ClassLoader.php");
+
+    $path = __DIR__.DIRECTORY_SEPARATOR."/../../";
 
     $loader = new ClassLoader();
     $loader->addPath(__DIR__ . "/../");
     $loader->register();
 
     if(php_sapi_name() === "cli"){
-        $class = new MPEProxy(__DIR__.DIRECTORY_SEPARATOR."/../../");
+
+        $logger = new Logger($path, 2);
+
+        try{
+            if (PHP_SAPI === 'cli' && str_starts_with(__FILE__, 'phar://')) {
+                $vendorDir = dirname(__FILE__) . '/../../vendor'; // Убедитесь, что используете dirname
+                require("$vendorDir/autoload.php");
+            } else {
+                require_once (__DIR__ . "/../../vendor/autoload.php");
+            }
+        } catch (\Error $exception) {
+            $logger->error("Vendor unfounded! Try \"composer install\"!");
+            die;
+        }
+
+        $class = new MPEProxy($path);
         $class->getLogger()->info("Thank you for using MPE-Proxy!");
     }else{
         echo "It cannot start from web.<br> Please start from a command-line<br>";
