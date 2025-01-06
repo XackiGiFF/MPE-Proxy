@@ -165,7 +165,7 @@ class SocketReader{
                 break;
             case 0xC0:
                 $this->logger->info("Server {$address}:{$port} get I DONT KNOW!");
-
+                break;
             case 0xfe:
                 $this->logger->info("Client {$address}:{$port} get QUERY INFO!");
                 break;
