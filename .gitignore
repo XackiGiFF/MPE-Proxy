@@ -1,4 +1,6 @@
 ./server.log
 server.log
+./config.json
+config.json
 /vendor/
 /bin/

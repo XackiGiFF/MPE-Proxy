@@ -126,29 +126,56 @@ class SocketReader{
         // Try read the type of packet
         $stream = new BinaryStream($buffer);
         $packetType = $stream->getByte();
+
+        $hexString = dechex($packetType);
+        $packetCode = '0x' . strtoupper($hexString);
+
+
         $this->logger->debug($packetType);
 
         switch ($packetType) {
+            case 0x01:
+                $this->logger->info(Logger::COLOR_YELLOW . "(С => S) Client {$address}:{$port} send unconnected ping!"); // С => S
+                break;
+            case 0x1c:
+                $this->logger->info(Logger::COLOR_RED . "(C <= S) Server {$address}:{$port} send unconnected pong!"); // C <= S
+                break;
+
+            case 0x05: // MessageIdentifiers::ID_OPEN_CONNECTION_REQUEST_1
+                $this->logger->info(Logger::COLOR_YELLOW . "(C => S) Client {$address}:{$port} send request 1"); // C => S
+                break;
+            case 0x06: // MessageIdentifiers::ID_OPEN_CONNECTION_REQUEST_2
+                $this->logger->info(Logger::COLOR_RED . "(C <= S) Server {$address}:{$port} send response 1"); // C <= S
+                break;
+            case 0x07:
+                $this->logger->info(Logger::COLOR_YELLOW . "(C => S) Client {$address}:{$port} send request 2"); // C => S
+                break;
+            case 0x08:
+                $this->logger->info(Logger::COLOR_RED . "(C <= S) Server {$address}:{$port} send response 2"); // C <= S
+                break;
+            case 0x09:
+                $this->logger->info(Logger::COLOR_YELLOW . "(C => S) Client {$address}:{$port} send request to connect"); // C => S
+                break;
+            case 0x10:
+                $this->logger->info(Logger::COLOR_RED . "(C <= S) Server {$address}:{$port} send response to connect"); // C <= S
+                break;
+
             case 0x80:
                 $this->logger->info("Client {$address}:{$port} get I DONT KNOW!");
                 break;
-            case MessageIdentifiers::ID_OPEN_CONNECTION_REQUEST_1:
-                $this->logger->debug("Processing connect request 1 from {$address}:{$port}");
-                $packet = new PublicOpenConnectionRequest1();
-                // Now we have access to the packet data.
-                break;
-            case MessageIdentifiers::ID_OPEN_CONNECTION_REQUEST_2:
-                $this->logger->debug("Processing connect request 2 from {$address}:{$port}");
-                $packet = new PublicOpenConnectionRequest2();
-                break;
+            case 0xC0:
+                $this->logger->info("Server {$address}:{$port} get I DONT KNOW!");
+
             case 0xfe:
                 $this->logger->info("Client {$address}:{$port} get QUERY INFO!");
                 break;
             default:
                 $this->logger->warn("Received unknown packet type {$packetType} from {$address}:{$port}");
+                $this->logger->info("Packet num: {$packetCode}");
                 return;
                 break;
         }
+        $this->logger->info("Packet num: {$packetCode}");
         // Add debug message for checking the contents of the buffer
         // Decode the packet
         if(isset($packet)){
